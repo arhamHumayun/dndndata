@@ -1,16 +1,14 @@
 import React, { useRef, useEffect, useState } from 'react';
-import lol from '../data/fixedCharacterList.json'
+import jsonData from '../data/fixedCharacterList.json'
 import { select } from 'd3';
 
 export default function CircleTime(){
 
     var result = []
-    for (var i = 0; i < lol.length; i++) {
-      result.push(lol[i].level)
+    for (var i = 0; i < jsonData.length; i++) {
+      result.push(jsonData[i].level)
     }
     result.sort((a, b) => (a - b));
-
-    console.log(result)
 
     const [data, setData] = useState(result);
     const svgRef = useRef();
@@ -30,7 +28,7 @@ export default function CircleTime(){
     }, [data]);
 
     return (
-      <div className="App">
+      <div>
         <svg ref={svgRef}></svg>
         <br />
         <button onClick={() => setData(data.map(value => value + 5))}>

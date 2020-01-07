@@ -1,40 +1,77 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { select, line, curveCardinal, axisBottom } from 'd3';
+import React, { useRef, useEffect, useState } from "react";
+import "../App.css";
+import {
+  select,
+  line,
+  curveCardinal,
+  axisBottom,
+  axisRight,
+  scaleLinear
+} from "d3";
 
+export default function Lines() {
+  const [data, setData] = useState([0, 40, 30, 70, 50, 40, 80, 30, 80, 20, 50, 10, 70]);
+  const svgRef = useRef();
 
-export default function Lines(){
+  // will be called initially and on every data change
+  useEffect(() => {
+    const svg = select(svgRef.current);
+    const xScale = scaleLinear()
+      .domain([0, data.length - 1])
+      .range([0, 300]);
 
-    const [data, setData] = useState([0,50,40,70,20,10,55]);
-    const svgRef = useRef();
+    const yScale = scaleLinear()
+      .domain([0, 150])
+      .range([150, 0]);
 
-    const xAxis = axisBottom()
+    const xAxis = axisBottom(xScale)
+      .ticks(data.length)
+      .tickFormat(index => index + 1);
+    svg
+      .select(".x-axis")
+      .style("transform", "translateY(150px)")
+      .call(xAxis);
 
-    // useEffect is called on every data change
-    useEffect(() => {
-      console.log(svgRef)
-      const svg = select(svgRef.current);
-      const myLine = line()
-                    .x((value, index) => index * 50)
-                    .y(value => value)
-                    .curve(curveCardinal)
-      svg.selectAll("path")
-         .data([data])
-         .join("path")
-         .attr("d", value => myLine(value))
-         .attr("fill", "none")
-         .attr("stroke", "blue");
-    }, [data]);
+    const yAxis = axisRight(yScale);
+    svg
+      .select(".y-axis")
+      .style("transform", "translateX(300px)")
+      .call(yAxis);
 
-    return (
-        <div>
-        <svg ref={svgRef}></svg>
-        <br />
-        <button onClick={() => setData(data.map(value => value + 5))}>
-          Update data
-        </button>
-        <button onClick={() => setData(data.filter(value => value < 35))}>
-          Filter data
-        </button>
-      </div>
-        );
+    // generates the "d" attribute of a path element
+    const myLine = line()
+      .x((value, index) => xScale(index))
+      .y(yScale)
+      .curve(curveCardinal);
+
+    // renders path element, and attaches
+    // the "d" attribute from line generator above
+    svg
+      .selectAll(".line")
+      .data([data])
+      .join("path")
+      .attr("class", "line")
+      .attr("d", myLine)
+      .attr("fill", "none")
+      .attr("stroke", "blue");
+  }, [data]);
+
+  return (
+    <div>
+      <svg ref={svgRef}>
+        <g className="x-axis" />
+        <g className="y-axis" />
+      </svg>
+      <br />
+      <br />
+      <br />
+      <br />
+      <button onClick={() => setData(data.map(value => value + 5))}>
+        Update data
+      </button>
+      <button onClick={() => setData(data.filter(value => value < 35))}>
+        Filter data
+      </button>
+    </div>
+  );
 }
